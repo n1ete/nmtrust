@@ -92,13 +92,16 @@ done
 file_check
 
 # Get all active connections.
-mapfile -t connections < <(nmcli --terse -f name,uuid conn show --active)
+#mapfile -t connections < <(nmcli --terse -f name,uuid conn show --active)
+mapfile -t connections < <(iwctl station wlan0 show | awk '/Connected network/{print $NF}' )
 
 # Get number of active connections.
-num_connections=$(comm -13 <(sort "$EXCLUDEFILE") <(nmcli --terse -f name conn show --active | sort) | wc -l)
+#num_connections=$(comm -13 <(sort "$EXCLUDEFILE") <(nmcli --terse -f name conn show --active | sort) | wc -l)
+num_connections=$(comm -13 <(sort "$EXCLUDEFILE") <(iwctl station wlan0 show | awk '/Connected network/{print $NF}' | sort) | wc -l)
 
 # Get number of trusted connections.
-num_trusted=$(comm -12 <(nmcli --terse -f uuid conn show --active | sort) <(sort "$TRUSTFILE") | wc -l)
+#num_trusted=$(comm -12 <(nmcli --terse -f uuid conn show --active | sort) <(sort "$TRUSTFILE") | wc -l)
+num_trusted=$(comm -12 <(iwctl station wlan0 show | awk '/Connected network/{print $NF}' | sort) <(sort "$TRUSTFILE") | wc -l)
 
 # Determine if there are active connections.
 if [ $num_connections -eq 0 ]; then
